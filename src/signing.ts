@@ -26,16 +26,11 @@ export async function signApkFile(
     core.debug(`Found 'zipalign' @ ${zipAlign}`);
 
     // Align the apk file
-    const alignedApkFile = apkFile.replace('.apk', '-aligned.apk');
+    const alignedApkFile = apkFile;
     await exec.exec(`"${zipAlign}"`, [
         '-c',
         '-v', '4',
         apkFile
-    ]);
-    
-    await exec.exec(`"cp"`, [
-        apkFile,
-        alignedApkFile
     ]);
 
     core.debug("Signing APK file");
@@ -60,15 +55,19 @@ export async function signApkFile(
     args.push(alignedApkFile);
 
     await exec.exec(`"${apkSigner}"`, args);
+    await exec.exec(`"move"`, [
+        signedApkFile,
+        apkFile
+    ]);
 
     // Verify
     core.debug("Verifying Signed APK");
     await exec.exec(`"${apkSigner}"`, [
         'verify',
-        signedApkFile
+        apkFile
     ]);
 
-    return signedApkFile
+    return apkFile
 }
 
 export async function signAabFile(
