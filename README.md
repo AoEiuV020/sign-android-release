@@ -37,6 +37,9 @@ Then copy the contents of the `.txt` file to your GH secrets
 
 ## Outputs
 
+输出和输入是相同的文件，并且没有中间临时文件，  
+也就是说不论是否执行这个签名，最终存在的都还是一样的那个文件，
+
 ### `signedReleaseFile`
 
 The path to the signed release file from this action
@@ -51,7 +54,7 @@ This also set's an environment variable that points to the signed release file
 steps:
   # ...
 
-  - uses: r0adkll/sign-android-release@v1
+  - uses: AoEiuV020/sign-android-release@v1
     name: Sign app APK
     # ID used to access action output
     id: sign_app
