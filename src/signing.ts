@@ -55,7 +55,7 @@ export async function signApkFile(
     args.push(alignedApkFile);
 
     await exec.exec(`"${apkSigner}"`, args);
-    await exec.exec(`"move"`, [
+    await exec.exec(`"mv"`, [
         signedApkFile,
         apkFile
     ]);
