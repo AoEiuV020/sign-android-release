@@ -33,7 +33,7 @@ Then copy the contents of the `.txt` file to your GH secrets
 
 ## ENV: `BUILD_TOOLS_VERSION`
 
-**Optional:** You can manually specify a version of build-tools to use. We use `29.0.3` by default.
+**Optional:** You can manually specify a version of build-tools to use. We use `33.0.2` by default.
 
 ## Outputs
 
@@ -65,7 +65,7 @@ steps:
       keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
       keyPassword: ${{ secrets.KEY_PASSWORD }}
     env:
-      // override default build-tools version (29.0.3) -- optional
+      // override default build-tools version (33.0.2) -- optional
       BUILD_TOOLS_VERSION: "30.0.2"
       
   # Example use of `signedReleaseFile` output -- not needed
