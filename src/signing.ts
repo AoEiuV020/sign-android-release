@@ -4,6 +4,33 @@ import * as io from '@actions/io';
 import * as path from "path";
 import * as fs from "fs";
 
+async function getHighestBuildToolsVersion(androidHome: string): Promise<string> {
+    const buildToolsDir = path.join(androidHome, 'build-tools');
+    if (!fs.existsSync(buildToolsDir)) {
+        throw new Error(`Android build-tools directory not found @ ${buildToolsDir}`);
+    }
+    
+    const versions = fs.readdirSync(buildToolsDir)
+        .filter(dir => fs.statSync(path.join(buildToolsDir, dir)).isDirectory())
+        .sort((a, b) => {
+            const partsA = a.split('.').map(Number);
+            const partsB = b.split('.').map(Number);
+            for (let i = 0; i < Math.max(partsA.length, partsB.length); i++) {
+                const numA = partsA[i] || 0;
+                const numB = partsB[i] || 0;
+                if (numA !== numB) return numB - numA;
+            }
+            return 0;
+        });
+        
+    if (versions.length === 0) {
+        throw new Error(`No build-tools versions found in ${buildToolsDir}`);
+    }
+    
+    core.debug(`Using highest build-tools version: ${versions[0]}`);
+    return versions[0];
+}
+
 export async function signApkFile(
     apkFile: string,
     signingKeyFile: string,
@@ -15,11 +42,15 @@ export async function signApkFile(
     core.debug("Zipaligning APK file");
 
     // Find zipalign executable
-    const buildToolsVersion = process.env.BUILD_TOOLS_VERSION || '33.0.2';
+    const buildToolsVersion = process.env.BUILD_TOOLS_VERSION || '';
     const androidHome = process.env.ANDROID_HOME;
-    const buildTools = path.join(androidHome!, `build-tools/${buildToolsVersion}`);
-    if (!fs.existsSync(buildTools)) {
-        core.error(`Couldnt find the Android build tools @ ${buildTools}`)
+    let buildTools = path.join(androidHome!, `build-tools/${buildToolsVersion}`);
+    
+    // If buildToolsVersion is empty or the specified version doesn't exist,
+    // find the highest version in build-tools directory
+    if (!buildToolsVersion || !fs.existsSync(buildTools)) {
+        const version = await getHighestBuildToolsVersion(androidHome!);
+        buildTools = path.join(androidHome!, `build-tools/${version}`);
     }
 
     const zipAlign = path.join(buildTools, 'zipalign');
